@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI.BULLIONAIRE Presale</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="text/javascript"></script>
+</head>
+<body>
+  <h1>AI.BULLIONAIRE Presale</h1>
+  <p>Presale Contract Address: 0x2C036E142F84b45fC1Ef944cE61b19a34d62B2Da</p>
+  <p>Token Contract Address: [Enter Token Contract Address]</p>
+
+  <button onclick="connectWallet()">Connect Wallet</button>
+  <p id="status"></p>
+
+  <h2>Presale Information</h2>
+  <p id="presaleInfo"></p>
+
+  <h2>Buy Tokens</h2>
+  <p>Enter the quantity of tokens you want to buy:</p>
+  <input type="number" id="quantityInput" min="1" step="1" required>
+  <button onclick="buyTokens()">Buy Tokens</button>
+
+  <h2>Claim Tokens</h2>
+  <button onclick="claimTokens()">Claim Tokens</button>
+
+  <script type="text/javascript">
+    // Update the contract address and ABI here
+    const presaleContractAddress = '0x2C036E142F84b45fC1Ef944cE61b19a34d62B2Da';
+    const presaleContractABI = [Enter Presale Contract ABI];
+
+    // Set up ethers provider and signer
+    const provider = ethers.getDefaultProvider();
+    let signer;
+
+    async function connectWallet() {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          await ethereum.enable();
+          signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+          updateStatus('Connected to wallet.');
+          enablePresaleFunctions();
+        } catch (error) {
+          updateStatus('Failed to connect wallet.');
+          console.error(error);
+        }
+      } else {
+        updateStatus('No wallet provider found.');
+      }
+    }
+
+    function updateStatus(message) {
+      const statusElement = document.getElementById('status');
+      statusElement.innerHTML = message;
+    }
+
+    async function enablePresaleFunctions() {
+      const presaleContract = new ethers.Contract(presaleContractAddress, presaleContractABI, signer);
+
+      // Retrieve presale information
+      const name = await presaleContract.name();
+      const symbol = await presaleContract.symbol();
+      const presaleEnded = await presaleContract.presaleEnded();
+      const minimumBuy = await presaleContract.minimumBuy();
+
+      const presaleInfoElement = document.getElementById('presaleInfo');
+      presaleInfoElement.innerHTML = `Name: ${name}<br>
+                                      Symbol: ${symbol}<br>
+                                      Presale Ended: ${presaleEnded ? 'Yes' : 'No'}<br>
+                                      Minimum Buy: ${minimumBuy} ETH`;
+    }
+
+    async function buyTokens() {
+      const quantityInput = document.getElementById('quantityInput');
+      const quantity = quantityInput.value;
+
+      const presaleContract = new ethers.Contract(presaleContractAddress, presaleContractABI, signer);
+      const tx = await presaleContract.buyTokens({ value: ethers.utils.parseEther(quantity) });
+      await tx.wait();
+
+      updateStatus
